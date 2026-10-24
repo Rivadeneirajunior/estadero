@@ -1,0 +1,1 @@
+historia-clientes.csv: clientes por año INVENTADOS para el ejercicio. Reemplazar por los registros reales de ventas del estadero.

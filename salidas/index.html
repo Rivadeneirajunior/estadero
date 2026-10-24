@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Estadero · ¿Abrimos entre semana en 2027?</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{--navy:#12345a;--gold:#c8962b;--red:#c0392b;--bg:#f6f7fa;--ink:#1c2430}
+*{box-sizing:border-box}body{margin:0;font-family:Arial,Helvetica,sans-serif;background:var(--bg);color:var(--ink)}
+header{background:var(--navy);color:#fff;padding:20px 16px;border-bottom:4px solid var(--gold)}
+header h1{margin:0 0 6px;font-size:22px}header p{margin:2px 0;font-size:14px;opacity:.9}
+main{max-width:980px;margin:auto;padding:16px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.k{background:#fff;border-radius:8px;padding:12px;border-left:4px solid var(--gold)}
+.k b{display:block;font-size:22px;color:var(--navy)}.k span{font-size:12px;color:#555}
+.k.neg b{color:var(--red)}
+section{background:#fff;border-radius:8px;padding:14px;margin-top:14px}
+h2{margin:0 0 10px;font-size:17px;color:var(--navy)}
+.tw{overflow-x:auto}table{border-collapse:collapse;width:100%;font-size:13px;white-space:nowrap}
+th,td{padding:6px 8px;text-align:right;border-bottom:1px solid #e3e6ec}th:first-child,td:first-child{text-align:left}
+th{background:#eef1f6;color:var(--navy)}tr.t td{font-weight:bold;background:#fafbfd}td.n{color:var(--red)}
+.ph{color:#888;font-size:13px;border:1px dashed #c9ced8;border-radius:6px;padding:10px}
+@media(min-width:700px){.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}}.g3>div{border:1px solid #e3e6ec;border-radius:6px;padding:8px;margin-bottom:8px;font-size:13px}.g3 b{color:var(--navy)}
+#memo p{margin:6px 0;font-size:14px}.dd{display:grid;gap:8px;margin-top:8px}@media(min-width:700px){.dd{grid-template-columns:1fr 1fr}}.dd div{border-radius:6px;padding:8px;font-size:13px}.sl{margin:8px 0;font-size:13px}.sl input{width:100%}.sl small{color:#666;display:block}
+footer{font-size:12px;color:#444;padding:14px 16px 30px;max-width:980px;margin:auto}
+.warn{background:#fff6e0;border-radius:6px;padding:8px;font-size:13px}
+</style></head><body>
+<header><h1>Estadero · ¿Abrimos entre semana en 2027?</h1>
+<p>Decisión: abrir miércoles y jueves y con cuánta reserva de dinero.</p>
+<p>Periodo: los 12 meses de 2027 · Cifras en pesos colombianos</p></header>
+<main>
+<div class="warn">Ejercicio de práctica: todos los valores son supuestos inventados, sin datos reales del negocio.</div>
+<section id="dec"><h2>Decisión</h2><div id="memo"></div></section>
+<div class="kpis" id="kpis" style="margin-top:12px"></div>
+<section><h2>Caso base: clientes por mes</h2><canvas id="c" height="230"></canvas></section>
+<section><h2>Detalle mensual</h2><div class="tw"><table id="t"></table></div></section>
+<section><h2>¿Le creemos al pronóstico?</h2><canvas id="pr" height="150"></canvas><p id="prt"></p></section>
+<section><h2>Tres escenarios</h2><div class="g3" id="es"></div></section>
+<section><h2>¿Qué supuesto pesa más?</h2><canvas id="tor" height="190"></canvas><p id="tort"></p></section>
+<section><h2>¿Y si…?</h2><div id="sim"></div><div class="kpis" id="so" style="margin:10px 0"></div><canvas id="sc" height="170"></canvas><button id="rs" style="margin-top:8px;padding:8px 14px;border:0;border-radius:6px;background:var(--navy);color:#fff">Volver al caso base</button></section>
+
+</main>
+<footer id="f"></footer>
+<script>
+const D=/*DATA*/{"torn": [{"nombre": "Captura por día abierto", "rango": 50, "mal": -70200000, "bien": 70200000}, {"nombre": "Personas en el área de influencia", "rango": 25, "mal": -35046000, "bien": 35154000}, {"nombre": "Precio por persona", "rango": 10, "mal": -23400000, "bien": 23400000}, {"nombre": "Costos fijos adicionales al mes", "rango": 10, "mal": -10800000, "bien": 10800000}, {"nombre": "Costo por cliente", "rango": 10, "mal": -9360000, "bien": 9360000}], "par": {"pob": 50000, "cap": 0.001, "pr": 45000, "co": 18000, "fj": 9000000, "src": {"pob": "Inventado para el ejercicio, sin evidencia. Reemplazar por cifra del DANE o del propietario", "cap": "Inventado: 1 de cada 1.000 personas del área visita en un día abierto. Sin evidencia", "pr": "Inventado: gasto promedio por persona, por comprobar con ventas reales", "co": "Inventado: bebidas y comida, 40 % del gasto promedio", "fj": "Inventado: personal de barra, cocina y seguridad, energía y música de los días extra"}}, "memo": {"reco": "Abrir entre semana (miércoles y jueves), pero con un piloto de tres meses antes de comprometer un año de costos fijos adicionales.", "esc": "Si la demanda es 30 % menor, la utilidad del año sería -$ 9.720.000 con 10 meses en pérdida; en el caso base, $ 32.400.000 con 0 meses en pérdida; si es 20 % mayor, $ 60.480.000 con 0 meses en pérdida.", "riesgo": "El supuesto más riesgoso es la captura (rango ± 50 %, el más amplio). Si menos de 0,077 % de las personas del área visita en un día abierto (el caso base supone 0,10 %), el año no cubre los costos adicionales.", "comprobar": "Medir durante un piloto de tres meses, o con una preventa o encuesta, cuántas personas llegan por día abierto y compararlo con la captura de equilibrio.", "reserva": "Reserva necesaria: $ 10.170.000 (escenario pesimista); el caso base no necesita reserva. No incluye inversión inicial.", "datos": "Lo que dicen los datos: todavía no hay datos medidos. La historia de clientes y todos los valores de este ejercicio son inventados.", "sup": "Lo que suponemos: 50.000 personas en el área, captura de 0,10 %, precio de $ 45.000, costo de $ 18.000 por cliente y $ 9.000.000 al mes de costos fijos adicionales. Si se cumplen, tendríamos 5.200 clientes y una utilidad de $ 32.400.000 en 2027."}, "pron": [{"metodo": "Seguir la tendencia (2025 crece como de 2023 a 2024)", "pred": 53878, "real": 49000, "error": 10.0}, {"metodo": "Repetir 2024", "pred": 47000, "real": 49000, "error": -4.1}], "esc": {"pesimista": {"var": -0.3, "utilidades": [-1440000, -1440000, -495000, -495000, -1440000, -495000, -495000, -1440000, 450000, -1440000, -1440000, 450000], "clientes": 3640, "utilidad": -9720000, "perdidas": 10, "reserva": 10170000}, "base": {"var": 0, "utilidades": [1800000, 1800000, 3150000, 3150000, 1800000, 3150000, 3150000, 1800000, 4500000, 1800000, 1800000, 4500000], "clientes": 5200, "utilidad": 32400000, "perdidas": 0, "reserva": 0}, "optimista": {"var": 0.2, "utilidades": [3960000, 3960000, 5580000, 5580000, 3960000, 5580000, 5580000, 3960000, 7200000, 3960000, 3960000, 7200000], "clientes": 6240, "utilidad": 60480000, "perdidas": 0, "reserva": 0}}, "meses": [{"mes": "Enero", "dias": 8, "clientes": 400, "ingresos": 18000000, "cv": 7200000, "cf": 9000000, "utilidad": 1800000}, {"mes": "Febrero", "dias": 8, "clientes": 400, "ingresos": 18000000, "cv": 7200000, "cf": 9000000, "utilidad": 1800000}, {"mes": "Marzo", "dias": 9, "clientes": 450, "ingresos": 20250000, "cv": 8100000, "cf": 9000000, "utilidad": 3150000}, {"mes": "Abril", "dias": 9, "clientes": 450, "ingresos": 20250000, "cv": 8100000, "cf": 9000000, "utilidad": 3150000}, {"mes": "Mayo", "dias": 8, "clientes": 400, "ingresos": 18000000, "cv": 7200000, "cf": 9000000, "utilidad": 1800000}, {"mes": "Junio", "dias": 9, "clientes": 450, "ingresos": 20250000, "cv": 8100000, "cf": 9000000, "utilidad": 3150000}, {"mes": "Julio", "dias": 9, "clientes": 450, "ingresos": 20250000, "cv": 8100000, "cf": 9000000, "utilidad": 3150000}, {"mes": "Agosto", "dias": 8, "clientes": 400, "ingresos": 18000000, "cv": 7200000, "cf": 9000000, "utilidad": 1800000}, {"mes": "Septiembre", "dias": 10, "clientes": 500, "ingresos": 22500000, "cv": 9000000, "cf": 9000000, "utilidad": 4500000}, {"mes": "Octubre", "dias": 8, "clientes": 400, "ingresos": 18000000, "cv": 7200000, "cf": 9000000, "utilidad": 1800000}, {"mes": "Noviembre", "dias": 8, "clientes": 400, "ingresos": 18000000, "cv": 7200000, "cf": 9000000, "utilidad": 1800000}, {"mes": "Diciembre", "dias": 10, "clientes": 500, "ingresos": 22500000, "cv": 9000000, "cf": 9000000, "utilidad": 4500000}], "tot": {"dias": 104, "clientes": 5200, "ingresos": 234000000, "cv": 93600000, "cf": 108000000, "utilidad": 32400000}, "eq": 334, "perdidas": 0, "reserva": 0, "sup": [["Personas en el área de influencia", "50.000", "Inventado para el ejercicio, sin evidencia. Reemplazar por cifra del DANE o del propietario", 25], ["Captura por día abierto", "0,10 %", "Inventado: 1 de cada 1.000 personas del área visita en un día abierto. Sin evidencia", 50], ["Precio por persona", "45.000", "Inventado: gasto promedio por persona, por comprobar con ventas reales", 10], ["Costo por cliente", "18.000", "Inventado: bebidas y comida, 40 % del gasto promedio", 10], ["Costos fijos adicionales al mes", "9.000.000", "Inventado: personal de barra, cocina y seguridad, energía y música de los días extra", 10], ["Patrón de días abiertos entre semana", "1100111", "Decisión del caso: abrir miércoles y jueves", 0], ["Variación de demanda, escenario pesimista", "-0.3", "Inventado: entre semana se llena 30 % menos de lo esperado", 0], ["Variación de demanda, escenario base", "0", "Caso base, sin cambio", 0], ["Variación de demanda, escenario optimista", "0.2", "Inventado: entre semana se llena 20 % más de lo esperado", 0]]}/*FIN*/;
+const nf=new Intl.NumberFormat('es-CO'),p=n=>(n<0?'-':'')+'$ '+nf.format(Math.abs(n));
+const K=[[nf.format(D.tot.clientes),'Clientes del año',0],[p(D.tot.utilidad),'Utilidad del año',D.tot.utilidad<0],[nf.format(D.eq),'Punto de equilibrio (clientes al mes)',0],[D.perdidas,'Meses con pérdida',D.perdidas>0]];
+document.getElementById('kpis').innerHTML=K.map(k=>`<div class="k ${k[2]?'neg':''}"><b>${k[0]}</b><span>${k[1]}</span></div>`).join('');
+new Chart(document.getElementById('c'),{data:{labels:D.meses.map(m=>m.mes.slice(0,3)),datasets:[
+{type:'bar',label:'Clientes',data:D.meses.map(m=>m.clientes),backgroundColor:D.meses.map(m=>m.clientes<D.eq?'#c0392b':'#12345a')},
+{type:'line',label:'Punto de equilibrio',data:D.meses.map(()=>D.eq),borderColor:'#c8962b',borderDash:[6,4],pointRadius:0}]},
+options:{responsive:true,scales:{y:{beginAtZero:true}}}});
+new Chart(document.getElementById('pr'),{type:'bar',data:{labels:D.pron.map(x=>x.metodo),datasets:[{label:'Error frente al real (%)',data:D.pron.map(x=>x.error),backgroundColor:D.pron.map(x=>Math.abs(x.error)>5?'#c0392b':'#12345a')}]},options:{indexAxis:'y',plugins:{legend:{display:false}}}});
+const bp=D.pron.reduce((a,b)=>Math.abs(a.error)<=Math.abs(b.error)?a:b);
+document.getElementById('prt').textContent='Usamos «'+bp.metodo+'» porque falló menos ('+bp.error.toString().replace('.',',')+' %) al predecir el último año con datos anteriores. Por eso el caso base repite la demanda esperada sin suponer crecimiento.';
+const NE={pesimista:'Pesimista',base:'Base',optimista:'Optimista'};
+document.getElementById('es').innerHTML=Object.keys(D.esc).map(k=>{const e=D.esc[k];return `<div><b>${NE[k]}</b> (demanda ${e.var>0?'+':''}${Math.round(e.var*100)} %)<br>Utilidad del año: ${p(e.utilidad)}<br>Meses con pérdida: ${e.perdidas}<br>Reserva necesaria: ${p(e.reserva)}<canvas id="e_${k}" height="170"></canvas></div>`}).join('');
+Object.keys(D.esc).forEach(k=>new Chart(document.getElementById('e_'+k),{type:'bar',data:{labels:D.meses.map(m=>m.mes.slice(0,1)),datasets:[{data:D.esc[k].utilidades,backgroundColor:D.esc[k].utilidades.map(u=>u<0?'#c0392b':'#12345a')}]},options:{plugins:{legend:{display:false}}}}));
+const M=D.memo;
+document.getElementById('memo').innerHTML=`<p><b>Recomendación:</b> ${M.reco}</p><p><b>Escenarios:</b> ${M.esc}</p><p><b>Supuesto más riesgoso:</b> ${M.riesgo}</p><p><b>Cómo comprobarlo:</b> ${M.comprobar}</p><p><b>${M.reserva.replace(':',':</b>')}</p><div class="dd"><div style="background:#e8f3ea">${M.datos}</div><div style="background:#fff6e0">${M.sup}</div></div>`;
+const TN=D.torn;
+new Chart(document.getElementById('tor'),{type:'bar',data:{labels:TN.map(t=>t.nombre+' (±'+t.rango+' %)'),datasets:[{data:TN.map(t=>[t.mal,t.bien]),backgroundColor:'#12345a'}]},options:{indexAxis:'y',plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>p(c.raw[0])+' a '+p(c.raw[1])}}},scales:{x:{ticks:{callback:v=>nf.format(v/1e6)+' M'},title:{display:true,text:'Cambio en la utilidad del año (millones de pesos)'}}}}});
+document.getElementById('tort').innerHTML='Pesa más: <b>'+TN[0].nombre.toLowerCase()+'</b>. La población del área se puede comprobar con cifras oficiales; el precio y los costos, con cotizaciones y ventas reales; la captura, con un piloto, una preventa o una encuesta antes de invertir.';
+const P0=D.par,V0={dem:0,cap:P0.cap,pr:P0.pr,co:P0.co,fj:P0.fj};let V={...V0};
+const CT=[['dem','Variación de demanda',-0.4,0.2,0.01,v=>Math.round(v*100)+' %','Caso base, sin cambio'],['cap','Captura por día abierto',0.0002,0.003,0.00005,v=>(v*100).toFixed(3).replace('.',',')+' %',P0.src.cap],['pr','Precio por persona',30000,70000,1000,p,P0.src.pr],['co','Costo por cliente',10000,30000,500,p,P0.src.co],['fj','Costos fijos adicionales al mes',5e6,14e6,250000,p,P0.src.fj]];
+document.getElementById('sim').innerHTML=CT.map(c=>`<div class="sl"><label>${c[1]}: <b id="v_${c[0]}"></b></label><input type="range" id="r_${c[0]}" min="${c[2]}" max="${c[3]}" step="${c[4]}"><small>Valor inicial: ${c[5](V0[c[0]])} · ${c[6]}</small></div>`).join('');
+const sc=new Chart(document.getElementById('sc'),{type:'bar',data:{labels:D.meses.map(m=>m.mes.slice(0,3)),datasets:[{data:[],backgroundColor:[]}]},options:{plugins:{legend:{display:false}}}});
+function sim(){const u=D.meses.map(m=>Math.floor(m.dias*P0.pob*V.cap*(1+V.dem)+0.5)*(V.pr-V.co)-V.fj),t=u.reduce((a,b)=>a+b,0),n=u.filter(x=>x<0).length;
+CT.forEach(c=>{document.getElementById('v_'+c[0]).textContent=c[5](V[c[0]]);document.getElementById('r_'+c[0]).value=V[c[0]]});
+document.getElementById('so').innerHTML=`<div class="k ${t<0?'neg':''}"><b>${p(t)}</b><span>Utilidad del año</span></div><div class="k ${n?'neg':''}"><b>${n}</b><span>Meses con pérdida</span></div>`;
+sc.data.datasets[0].data=u;sc.data.datasets[0].backgroundColor=u.map(x=>x<0?'#c0392b':'#12345a');sc.update()}
+CT.forEach(c=>document.getElementById('r_'+c[0]).addEventListener('input',e=>{V[c[0]]=parseFloat(e.target.value);sim()}));
+document.getElementById('rs').onclick=()=>{V={...V0};sim()};sim();
+const h=['Mes','Días abiertos','Clientes','Ingresos','Costos variables','Costos fijos','Utilidad'];
+const row=(m,c)=>`<tr class="${c||''}"><td>${m.mes}</td><td>${nf.format(m.dias)}</td><td>${nf.format(m.clientes)}</td><td>${p(m.ingresos)}</td><td>${p(m.cv)}</td><td>${p(m.cf)}</td><td class="${m.utilidad<0?'n':''}">${p(m.utilidad)}</td></tr>`;
+document.getElementById('t').innerHTML='<tr>'+h.map(x=>`<th>${x}</th>`).join('')+'</tr>'+D.meses.map(m=>row(m)).join('')+row(Object.assign({mes:'Total'},D.tot),'t');
+document.getElementById('f').innerHTML='<b>Datos:</b> ninguno; no hay cifras oficiales en este ejercicio.<br><b>Supuestos</b> (valor · de dónde sale · rango): '+D.sup.map(s=>`${s[0]}: ${s[1]} · ${s[2]} · ±${s[3]} %`).join('; ')+'.<br><b>Uso de IA:</b> el modelo y el dashboard los escribió una IA; los supuestos y la decisión son de quien lo usa.';
+</script></body></html>
